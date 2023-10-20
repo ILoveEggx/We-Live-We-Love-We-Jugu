@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import FallingObject from "../ui/FallingObject";
 import Laser from "../ui/Laser";
+import BlueMeat from "../ui/bluemeat";
 export default class CoronaBusterScene extends Phaser.Scene {
   constructor() {
     super("corona-buster-scene");
@@ -20,6 +21,8 @@ export default class CoronaBusterScene extends Phaser.Scene {
     this.hunger = 100;
     this.bluemeat = undefined;
     this.backsound = undefined;
+    this.timer = 100
+    this.timerLabel = undefined; 
     this.countdown = undefined
   }
   preload() {
@@ -33,12 +36,16 @@ export default class CoronaBusterScene extends Phaser.Scene {
       frameWidth: 202,
       frameHeight: 202,
     });
-    this.load.image("meat", "images/blue-meat.png");
+    this.load.spritesheet("bluemeat", "images/blue-meat.png",{
+      frameWidth:16,
+      frameHeight:16,
+    });
+    
     this.load.spritesheet("laser", "images/laser-bolts.png", {
       frameWidth: 16,
       frameHeight: 16,
     });
-    this.load.audio("bgsound", "sfx/smurf cat.mp3");
+    this.load.audio("bgsound", "sfx/Smurf cat.mp3");
     this.load.audio("bgsound2", "sfx/anoanowilkam.mp3");
     this.load.audio("eat", "sfx/eat.mp3");
     this.load.audio("shoot", "sfx/JUGUJUGU.mp3");
@@ -96,7 +103,7 @@ export default class CoronaBusterScene extends Phaser.Scene {
     );
     // @ts-ignore
     this.hungerLabel = this.add
-      .text(10, 30, "Hunger", {
+      .text(10, 30, "Hunger ", {
         fontSize: "18px",
         fill: "black",
         backgroundColor: "white",
@@ -104,13 +111,20 @@ export default class CoronaBusterScene extends Phaser.Scene {
       .setDepth(1);
     this.physics.add.overlap(
       this.player,
-      this.enemies,
-      this.decreaseLife,
+      this.anoanowilkum,
+      this.decreaseHunger,
       null,
       this
     );
-    this.handsanitizer = this.physics.add.group({
-      classType: FallingObject,
+    this.physics.add.overlap(
+      this.player,
+      this.smurfcat,
+      this.decreaseHunger2,
+      null,
+      this
+    );
+    this.bluemeat = this.physics.add.group({
+      classType:BlueMeat,
       runChildUpdate: true,
     });
     this.time.addEvent({
@@ -132,6 +146,15 @@ export default class CoronaBusterScene extends Phaser.Scene {
       volume: 0.5,
     };
     this.backsound.play(soundConfig);
+    this.timerLabel = this.add.text(380,10,'Time :', {
+      fill:'white', backgroundColor: 'black'
+    }).setDepth(1)
+    this.countdown = this.time.addEventEvent({
+      delay:500,
+      callback:this.gameOver,
+      callbackScope: this,
+      loop: true
+    })
   }
 
   // @ts-ignore
@@ -149,6 +172,7 @@ export default class CoronaBusterScene extends Phaser.Scene {
     });
     this.movePlayer(this.player, time);
     this.hungerLabel.setText('Hunger : ' + this.hunger)
+    this.timerLabel.setText('Timer :'+this.timer) 
   }
   // @ts-ignore
   createButton() {
@@ -288,15 +312,22 @@ export default class CoronaBusterScene extends Phaser.Scene {
   }
   hitSmurfcat(laser, smurfcat) {
     laser.die();
+    const bluemeat = this.bluemeat.get(0,0,'bluemeat')
+    if (bluemeat){
+      bluemeat.spawn(smurfcat.x,smurfcat.y)
+    }
     smurfcat.die();
     this.sound.play("destroy");
+  }
+  spawnBluemeat(){
+    
   }
   decreaseHunger(player, anoanowilkum) {
     anoanowilkum.die();
     this.hunger-=60
      if (this.hunger <= 0) {
       this.sound.stopAll();
-      this.scene.start("over-scene", { hunger: this.hunger });
+      this.scene.start("over-scene");
     }
   }
   decreaseHunger2(player, smurfcat) {
@@ -304,7 +335,7 @@ export default class CoronaBusterScene extends Phaser.Scene {
     this.hunger-=10
      if (this.hunger <= 0) {
       this.sound.stopAll();
-      this.scene.start("over-scene", { hunger: this.hunger });
+      this.scene.start("over-scene");
     }
   }
   spawnHandsanitizer() {
@@ -324,6 +355,12 @@ export default class CoronaBusterScene extends Phaser.Scene {
     if (this.life >= 3) {
       player.clearTint().setAlpha(2);
       this.sound.play("life");
+    }
+  }
+  gameOver() {
+    this.timer--
+    if(this.timer<0){
+      this.scene.start('over-scene')
     }
   }
 }
