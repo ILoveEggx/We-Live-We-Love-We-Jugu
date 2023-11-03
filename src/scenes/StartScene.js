@@ -7,12 +7,12 @@ export default class StartScene extends Phaser.Scene {
     this.replayButton = undefined;
   }
   preload() {
-    this.load.image("background", "images/bg_layer1.png");
+    this.load.image("backgroundstart", "images/bg_layer1.png");
     this.load.image("play-button", "images/pleybaton.png");
   }
   create() {
-    this.add.image(200, 320, "background");
-    this.add.text(15, 200, "CORONA BUSTER", {
+    this.add.image(200, 320, "backgroundstart");
+    this.add.text(73, 200, "JUGU JUGU", {
       fontSize: "48px",
       fill: "black",
     });

@@ -7,8 +7,8 @@ export default class FallingObject extends Phaser.Physics.Arcade.Sprite {
     this.rotationVal = config.rotation;
   }
 
-  spawn(positionX) {
-    this.setPosition(positionX, -10);
+  spawn(positionX, positionY = -10) {
+    this.setPosition(positionX, positionY);
     this.setActive(true);
     this.setVisible(true);
   }
